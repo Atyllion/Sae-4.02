@@ -1,0 +1,24 @@
+<html>
+ <head>
+   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@3.3.0/dist/aframe-physics-system.min.js"></script>
+ </head>
+ <body>
+   <a-scene physics="debug: true">
+     <!-- Préchargement du modèle 3D -->
+     <a-assets>
+       <a-asset-item id="bookModel" src="Book.glb"></a-asset-item>
+     </a-assets>
+
+     <!-- Ajout du modèle 3D à la scène avec physique -->
+     <a-entity gltf-model="#bookModel" position="0 2 -2" rotation="0 45 0" scale="1 1 1" dynamic-body></a-entity>
+
+     <!-- Objets existants avec physique -->
+     <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" static-body></a-box>
+     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" static-body></a-sphere>
+     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" static-body></a-cylinder>
+     <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4" static-body></a-plane>
+     <a-sky color="#ECECEC"></a-sky>
+   </a-scene>
+</body>
+</html>
