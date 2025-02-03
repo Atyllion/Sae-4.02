@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Physique avec A-Frame</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/n5ro/aframe-physics-system/master/dist/aframe-physics-system.min.js"></script>
+</head>
+<body>
+    <a-scene physics="debug: true">
+        <!-- Préchargement du modèle 3D -->
+        <a-assets>
+            <a-asset-item id="bookModel" src="../Book.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Ajout du modèle 3D à la scène avec physique et interaction -->
+        <a-entity gltf-model="#bookModel" position="0 2 -2" rotation="0 45 0" scale="1 1 1"
+                  dynamic-body drag-move ammo-body="type: dynamic; mass: 1; gravity: 9.8 0 0; linearDamping: 0.9"></a-entity>
+
+        <!-- Sol physique -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10"
+                 color="#555555" static-body></a-plane>
+
+        <!-- Lumière -->
+        <a-light type="ambient" position="5 10 5" intensity="1.5"></a-light>
+    </a-scene>
+
+</body>
+</html>

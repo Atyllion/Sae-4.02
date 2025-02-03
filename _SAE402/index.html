@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Examples • AmmoDriver</title>
+  <meta name="description" content="Hello, WebVR! - A-Frame" />
+  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+</head>
+
+
+<body>
+  <a-scene physics="driver: ammo; debug: true; gravity: -9.8; debugDrawMode: 1">
+    <a-camera near="0.001"></a-camera>
+    <a-box position="-1 5 -5" rotation="0 45 0" color="#4CC3D9" shadow ammo-body
+      ammo-shape="type: box; halfExtents: 0.6 0.6 0.6; fit: manual;"></a-box>
+    <!-- Préchargement du modèle 3D -->
+    <a-assets>
+      <a-asset-item id="bookModel" src="../Book.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- Ajout du modèle 3D à la scène avec physique et interaction -->
+    <a-entity gltf-model="#bookModel" position="0 2 -2" rotation="0 45 0" scale="1 1 1" position="-1 5 -5"
+      rotation="0 45 0" color="#4CC3D9" shadow dynamic-body drag-move
+      ammo-body="type: dynamic; mass: 1; gravity: 9.8 0 0; linearDamping: 0.9"
+      ammo-shape="type: box; halfExtents: 0.6 0.6 0.6; fit: manual;"></a-entity>
+
+    <!-- Sol physique -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#555555" static-body></a-plane>
+
+    <!-- Lumière -->
+    <a-light type="ambient" position="5 10 5" intensity="1.5"></a-light>
+  </a-scene>
+</body>
+
+</html>
