@@ -14,6 +14,8 @@
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
 
   </head>
+
+
   <body>
     <a-scene physics="debug: true; gravity: -9.8;">
       
@@ -64,56 +66,5 @@
       </a-assets>
 
     </a-scene>
-
-    <script>
-      AFRAME.registerComponent('debug-physics', {
-        init: function () {
-          console.log("Vérification du chargement de la physique...");
-          
-          setTimeout(() => {
-            let scene = this.el.sceneEl;
-            if (!scene.hasAttribute('physics')) {
-              console.error("La physique n'est PAS activée !");
-            } else {
-              console.log("La physique est activée !");
-            }
-          }, 2000);
-
-          this.el.sceneEl.addEventListener('physics-body-added', (evt) => {
-            console.log("Corps physique ajouté :", evt.detail);
-          });
-
-          setTimeout(() => {
-            let ground = document.querySelector("#ground");
-            let book = document.querySelector("#book");
-            let cube = document.querySelector("#fallingCube");
-
-            if (ground) {
-              ground.removeAttribute("static-body");
-              ground.setAttribute("static-body", "shape: box;");
-              console.log("Sol mis à jour !");
-            }
-
-            if (book) {
-              console.log("Attente du chargement de Book.glb...");
-              book.addEventListener('model-loaded', () => {
-                console.log("Book.glb chargé, ajout de la physique...");
-                book.setAttribute("dynamic-body", "shape: auto; mass: 2;");
-              });
-            }
-
-            if (cube) {
-              cube.removeAttribute("dynamic-body");
-              cube.setAttribute("dynamic-body", "shape: box; mass: 1;");
-              console.log("Cube mis à jour !");
-            }
-
-          }, 3000);
-        }
-      });
-
-      document.querySelector('a-scene').setAttribute('debug-physics', '');
-    </script>
-
   </body>
 </html>
