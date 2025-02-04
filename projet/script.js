@@ -1,53 +1,44 @@
-let book;
+AFRAME.registerComponent("click-grab", {
+    init: function () {
+      let el = this.el;
+      let scene = el.sceneEl;
+      let camera = document.querySelector("a-camera");
+      let isGrabbed = false;
 
-function getBook() {
-    book = document.getElementById('bookModel');
-    return book;
-}
+      function updatePosition(event) {
+        if (isGrabbed) {
+          let cameraPos = new THREE.Vector3();
+          let cameraQuat = new THREE.Quaternion();
 
-function Grab() {
-    document.addEventListener('mousedown', () => {
-        let book = getBook();
-        if (book) {
-            book.removeAttribute('dynamic-body');
-            document.addEventListener('mousemove', moveBook);
+          camera.object3D.getWorldPosition(cameraPos);
+          camera.object3D.getWorldQuaternion(cameraQuat);
+
+          // Convertit la position de la souris en coordonnées 3D
+          let mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+          let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -1); // Toujours devant
+          offset.applyQuaternion(cameraQuat); // Oriente l'objet devant la caméra
+
+          let newPosition = cameraPos.clone().add(offset);
+          el.object3D.position.copy(newPosition);
         }
-    });
-}
+      }
 
-function Drop() {
-    document.addEventListener('mouseup', () => {
-        let book = getBook();
-        if (book) {
-            book.setAttribute('dynamic-body', 'shape: box; mass: 1');
-            document.removeEventListener('mousemove', moveBook);
+      el.addEventListener("mousedown", function () {
+        console.log("Objet attrapé !");
+        isGrabbed = true;
+        el.setAttribute("dynamic-body", "mass: 0"); // Désactive la gravité
+        window.addEventListener("mousemove", updatePosition);
+      });
+
+      scene.addEventListener("mouseup", function () {
+        if (isGrabbed) {
+          console.log("Objet tombé !");
+          el.setAttribute("dynamic-body", "mass: 1; restitution: 0.6; friction: 0.5"); // Réactive la gravité
+          isGrabbed = false;
+          window.removeEventListener("mousemove", updatePosition);
         }
-    });
-}
-
-function moveBook() {
-    let book = getBook();
-    if (book) {
-        let cameraEl = document.querySelector('[camera]').object3D;
-
-        let vector = new THREE.Vector3();
-        cameraEl.getWorldDirection(vector);
-        vector.multiplyScalar(1); // Adjust the distance from the camera
-        
-        // Calculate the new position using cos and sin for rotation around the camera
-
-        let distance = 1; // Adjust the distance from the camera
-        let angle = Math.atan2(vector.z, vector.x);
-        let newPosX = cameraEl.position.x + distance * Math.cos(angle);
-        let newPosY = cameraEl.position.y; // Keep the same height as the camera
-        let newPosZ = cameraEl.position.z + distance * Math.sin(angle);
-
-        book.object3D.rotation.y = angle + Math.PI; // Rotate the book to face the camera
-        book.object3D.position.set(newPosX, newPosY, newPosZ);
-    }
-}
-
-
-console.log(getBook());
-Drop();
-Grab();
+      });
+    },
+  });

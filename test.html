@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>A-Frame + Ammo.js Physics</title>
-    
+
     <!-- Charger A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
@@ -13,58 +13,133 @@
     <!-- Charger la version corrigée de aframe-physics-system -->
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
 
+    <style>
+      .interactive {
+        cursor: grab;
+      }
+    </style>
   </head>
 
-
   <body>
+    <!-- Debug: true → hitbox des objets -->
     <a-scene physics="debug: true; gravity: -9.8;">
-      
+
       <!-- Lumière -->
-      <a-light type="directional" position="2 4 2" intensity="0.8"></a-light>
+      <a-light type="directional" position="2 4 4" intensity="0.6"></a-light>
+      <a-light type="ambient" position="2 4 2" intensity="0.2"></a-light>
 
       <!-- Sol renforcé (shape: box pour éviter les bugs) -->
-      <a-box 
+      <a-box
         id="ground"
-        position="0 -0.75 0" 
-        width="10" 
-        height="1.5" 
-        depth="10" 
+        position="0 -0.75 0"
+        width="10"
+        height="1.5"
+        depth="10"
         color="green"
         static-body="shape: box;">
       </a-box>
 
       <!-- Cube soumis à la gravité -->
-      <a-box 
+      <a-box
         id="fallingCube"
-        position="0 5 -2" 
-        width="1" 
-        height="1" 
-        depth="1" 
+        class="interactive"
+        position="0 5 -2"
+        width="1"
+        height="1"
+        depth="1"
         color="red"
         dynamic-body="shape: box; mass: 1;">
       </a-box>
 
       <!-- Book.glb soumis à la gravité -->
-      <a-entity 
+      <a-entity
         id="bookModel"
-        gltf-model="Book.glb"
-        position="2 5 -2"
-        width="1" 
-        height="1" 
-        depth="1" 
+        class="interactive"
+        gltf-model="assets/Book.glb"
+        position="0 4 -2"
+        width="1"
+        height="1"
+        depth="1"
         color="red"
         dynamic-body="shape: box; mass: 1;">
       </a-entity>
 
       <!-- Caméra -->
-      <a-entity position="0 1.6 5">
+      <a-entity position="0 0 5">
         <a-camera></a-camera>
       </a-entity>
 
-      <a-assets>
-        <a-asset-item id="bookModel" src="Book.glb"></a-asset-item>
-      </a-assets>
-
     </a-scene>
+
+    <script>
+      let isGrabbed = false;
+      let grabbedElement = null;
+
+      function grabElement(event) {
+        const mouse = new THREE.Vector2();
+        const raycaster = new THREE.Raycaster();
+        const camera = document.querySelector('[camera]').object3D;
+
+        // Convert mouse position to normalized device coordinates
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Update the raycaster with the camera and mouse positions
+        raycaster.setFromCamera(mouse, camera);
+
+        // Get the list of objects that intersect with the ray
+        const intersects = raycaster.intersectObjects(document.querySelectorAll('.interactive'), true);
+
+        if (intersects.length > 0) {
+          const element = intersects[0].object.el;
+          isGrabbed = true;
+          grabbedElement = element;
+          element.removeAttribute('dynamic-body');
+          window.addEventListener('mousemove', moveElement);
+          console.log('Element grabbed:', element.id);
+        } else {
+          console.log('No interactive element found at click position.');
+        }
+      }
+
+      function dropElement() {
+        if (isGrabbed && grabbedElement) {
+          isGrabbed = false;
+          grabbedElement.setAttribute('dynamic-body', 'shape: box; mass: 1; restitution: 0.6; friction: 0.5');
+          window.removeEventListener('mousemove', moveElement);
+          grabbedElement = null;
+          console.log('Element dropped');
+        }
+      }
+
+      function moveElement(event) {
+        if (isGrabbed && grabbedElement) {
+          const cameraEl = document.querySelector('[camera]').object3D;
+          const cameraPos = new THREE.Vector3();
+          const cameraQuat = new THREE.Quaternion();
+
+          cameraEl.getWorldPosition(cameraPos);
+          cameraEl.getWorldQuaternion(cameraQuat);
+
+          // Convert mouse position to normalized device coordinates
+          let mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+          let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -1); // Always in front
+          offset.applyQuaternion(cameraQuat); // Orient the object in front of the camera
+
+          let newPosition = cameraPos.clone().add(offset);
+          grabbedElement.object3D.position.copy(newPosition);
+
+          // Orient the object to face the camera
+          grabbedElement.object3D.lookAt(cameraPos);
+        }
+      }
+
+      // Add event listeners to the scene for mouse events
+      document.querySelector('a-scene').addEventListener('mousedown', grabElement);
+      document.querySelector('a-scene').addEventListener('mouseup', dropElement);
+
+    </script>
   </body>
 </html>
