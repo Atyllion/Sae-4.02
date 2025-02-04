@@ -1,75 +1,119 @@
-<html>
+<!DOCTYPE html>
+<html lang="fr">
   <head>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.1.2/dist/aframe-physics-system.min.js"></script>
-    <script src="https://cdn.rawgit.com/wmurphyrd/aframe-super-hands-component/master/dist/aframe-super-hands-component.min.js"></script>
+    <meta charset="utf-8" />
+    <title>A-Frame + Ammo.js Physics</title>
+    
+    <!-- Charger A-Frame -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+
+    <!-- Charger Ammo.js -->
+    <script src="https://cdn.jsdelivr.net/gh/kripken/ammo.js@master/builds/ammo.wasm.js"></script>
+
+    <!-- Charger la version corrigée de aframe-physics-system -->
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
+
   </head>
   <body>
+    <a-scene physics="debug: true; gravity: -9.8;">
+      
+      <!-- Lumière -->
+      <a-light type="directional" position="2 4 2" intensity="0.8"></a-light>
+
+      <!-- Sol renforcé (shape: box pour éviter les bugs) -->
+      <a-box 
+        id="ground"
+        position="0 -0.75 0" 
+        width="10" 
+        height="1.5" 
+        depth="10" 
+        color="green"
+        static-body="shape: box;">
+      </a-box>
+
+      <!-- Cube soumis à la gravité -->
+      <a-box 
+        id="fallingCube"
+        position="0 5 -2" 
+        width="1" 
+        height="1" 
+        depth="1" 
+        color="red"
+        dynamic-body="shape: box; mass: 1;">
+      </a-box>
+
+      <!-- Book.glb soumis à la gravité -->
+      <a-entity 
+        id="bookModel"
+        gltf-model="Book.glb"
+        position="2 5 -2"
+        width="1" 
+        height="1" 
+        depth="1" 
+        color="red"
+        dynamic-body="shape: box; mass: 1;">
+      </a-entity>
+
+      <!-- Caméra -->
+      <a-entity position="0 1.6 5">
+        <a-camera></a-camera>
+      </a-entity>
+
+      <a-assets>
+        <a-asset-item id="bookModel" src="Book.glb"></a-asset-item>
+      </a-assets>
+
+    </a-scene>
+
     <script>
-      AFRAME.registerComponent("click-grab", {
+      AFRAME.registerComponent('debug-physics', {
         init: function () {
-          let el = this.el;
-          let scene = el.sceneEl;
-          let camera = document.querySelector("a-camera");
-          let isGrabbed = false;
-
-          function updatePosition(event) {
-            if (isGrabbed) {
-              let cameraPos = new THREE.Vector3();
-              let cameraQuat = new THREE.Quaternion();
-              
-              camera.object3D.getWorldPosition(cameraPos);
-              camera.object3D.getWorldQuaternion(cameraQuat);
-              
-              // Convertit la position de la souris en coordonnées 3D
-              let mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-              let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-
-              let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -1); // Toujours devant
-              offset.applyQuaternion(cameraQuat); // Oriente l'objet devant la caméra
-
-              let newPosition = cameraPos.clone().add(offset);
-              el.object3D.position.copy(newPosition);
+          console.log("🛠️ Vérification du chargement de la physique...");
+          
+          setTimeout(() => {
+            let scene = this.el.sceneEl;
+            if (!scene.hasAttribute('physics')) {
+              console.error("❌ La physique n'est PAS activée !");
+            } else {
+              console.log("✅ La physique est activée !");
             }
-          }
+          }, 2000);
 
-          el.addEventListener("mousedown", function () {
-            console.log("Objet attrapé !");
-            isGrabbed = true;
-            el.setAttribute("dynamic-body", "mass: 0"); // Désactive la gravité
-            window.addEventListener("mousemove", updatePosition);
+          this.el.sceneEl.addEventListener('physics-body-added', (evt) => {
+            console.log("🔹 Corps physique ajouté :", evt.detail);
           });
 
-          scene.addEventListener("mouseup", function () {
-            if (isGrabbed) {
-              console.log("Objet tombé !");
-              el.setAttribute("dynamic-body", "mass: 1; restitution: 0.6; friction: 0.5"); // Réactive la gravité
-              isGrabbed = false;
-              window.removeEventListener("mousemove", updatePosition);
+          setTimeout(() => {
+            let ground = document.querySelector("#ground");
+            let book = document.querySelector("#book");
+            let cube = document.querySelector("#fallingCube");
+
+            if (ground) {
+              ground.removeAttribute("static-body");
+              ground.setAttribute("static-body", "shape: box;");
+              console.log("✅ Sol mis à jour !");
             }
-          });
-        },
+
+            if (book) {
+              console.log("🔄 Attente du chargement de Book.glb...");
+              book.addEventListener('model-loaded', () => {
+                console.log("📚 Book.glb chargé, ajout de la physique...");
+                book.setAttribute("dynamic-body", "shape: auto; mass: 2;");
+              });
+            }
+
+            if (cube) {
+              cube.removeAttribute("dynamic-body");
+              cube.setAttribute("dynamic-body", "shape: box; mass: 1;");
+              console.log("✅ Cube mis à jour !");
+            }
+
+          }, 3000);
+        }
       });
+
+      document.querySelector('a-scene').setAttribute('debug-physics', '');
     </script>
 
-    <a-scene physics="gravity: -9.8">
-      <!-- Sol avec collision réaliste -->
-      <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="green"
-               static-body material="shader: standard; roughness: 1; metalness: 0"></a-plane>
-
-      <!-- Objet à attraper avec physique avancée -->
-      <a-box id="grabbableBox" position="0 1 -3" width="0.5" height="0.5" depth="0.5" color="red"
-             class="grabbable clickable"
-             dynamic-body="shape: box; mass: 1; restitution: 0.6; friction: 0.5"
-             grabbable
-             click-grab></a-box>
-
-      <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
-
-      <!-- Caméra et contrôleurs -->
-      <a-entity id="cameraRig" position="0 1.6 0">
-        <a-camera position="0 0 0" wasd-controls look-controls></a-camera>
-      </a-entity>
-    </a-scene>
   </body>
 </html>
