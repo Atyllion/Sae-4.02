@@ -40,5 +40,24 @@ AFRAME.registerComponent("click-grab", {
           window.removeEventListener("mousemove", updatePosition);
         }
       });
+
+      let rightController = document.querySelector('#rightController');
+      if (rightController) {
+        rightController.addEventListener('triggerdown', function () {
+          console.log("Objet attrapé avec le contrôleur !");
+          isGrabbed = true;
+          el.setAttribute("dynamic-body", "mass: 0"); // Désactive la gravité
+          window.addEventListener("mousemove", updatePosition);
+        });
+
+        rightController.addEventListener('triggerup', function () {
+          if (isGrabbed) {
+            console.log("Objet tombé avec le contrôleur !");
+            el.setAttribute("dynamic-body", "mass: 1; restitution: 0.6; friction: 0.5"); // Réactive la gravité
+            isGrabbed = false;
+            window.removeEventListener("mousemove", updatePosition);
+          }
+        });
+      }
     },
   });

@@ -97,6 +97,10 @@
       <!-- Cursor pour détecter les objets cliquables -->
       <a-entity cursor="rayOrigin: mouse" raycaster="objects: .interactive"></a-entity>
 
+      <a-entity id="leftController" oculus-touch-controls="hand: left"></a-entity>
+      <a-entity id="rightController" oculus-touch-controls="hand: right">
+          <a-entity raycaster="showLine:true;objects: .collidable" cursor></a-entity>
+
     </a-scene>
 
     <script src="script.js">
