@@ -8,7 +8,7 @@
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <!-- Charger Ammo.js -->
-    <script src="https://cdn.jsdelivr.net/gh/kripken/ammo.js@master/builds/ammo.wasm.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/gh/kripken/ammo.js@master/builds/ammo.wasm.js"></script> -->
 
     <!-- Charger la version corrigée de aframe-physics-system -->
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
@@ -100,7 +100,7 @@
       <a-entity cursor="rayOrigin: mouse" raycaster="objects: .interactive"></a-entity>
 
       <!-- Controllers liés à la caméra -->
-      <a-entity id="cameraRig" position="0 1.6 0"></a-entity>
+      <a-entity id="cameraRig" position="0 1.6 0">
         <a-entity camera look-controls wasd-controls>
           <a-entity id="leftController" oculus-touch-controls="hand: left"></a-entity>
           <a-entity id="rightController" oculus-touch-controls="hand: right">
