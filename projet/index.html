@@ -91,7 +91,9 @@
 
       <!-- Caméra -->
       <a-entity position="0 0 5">
-        <a-camera></a-camera>
+        <a-camera look-controls="pointerLockEnabled: true">
+          <a-cursor></a-cursor>
+        </a-camera>
       </a-entity>
 
       <!-- Cursor pour détecter les objets cliquables -->
@@ -99,8 +101,7 @@
 
       <a-entity id="leftController" oculus-touch-controls="hand: left"></a-entity>
       <a-entity id="rightController" oculus-touch-controls="hand: right">
-          <a-entity raycaster="showLine:true;objects: .collidable" cursor></a-entity>
-
+      <a-entity raycaster="showLine:true;objects: .collidable" cursor></a-entity>
     </a-scene>
 
     <script src="script.js">
