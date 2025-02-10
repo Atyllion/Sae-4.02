@@ -17,7 +17,7 @@ AFRAME.registerComponent("click-grab", {
           let mouseX = (event.clientX / window.innerWidth) * 2 - 1;
           let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
-          let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -1); // Toujours devant
+          let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -3); // Toujours devant
           offset.applyQuaternion(cameraQuat); // Oriente l'objet devant la caméra
 
           let newPosition = cameraPos.clone().add(offset);
@@ -40,6 +40,7 @@ AFRAME.registerComponent("click-grab", {
           window.removeEventListener("mousemove", updatePosition);
         }
       });
+
 
       let rightController = document.querySelector('#rightController');
       if (rightController) {
