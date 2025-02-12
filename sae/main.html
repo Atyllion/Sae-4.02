@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub d'Accueil du Jeu</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <a-scene stats>
+        <!-- Black Sky -->
+        <a-sky color="#000000"></a-sky>
+
+        <!-- Camera -->
+        <a-entity position="0 1.6 2">
+            <a-camera look-controls="pointerLockEnabled: true" wasd-control="enabled: false"></a-camera>
+            <a-cursor color="#FF0000"></a-cursor>
+        </a-entity>
+
+        <!-- Welcome Text -->
+        <a-text value="Conveyor the Game" align="center" side="double" position="0 6 -2" rotation="30 0 0" color="#FFFFFF" scale="3 3 3"></a-text>
+
+        <!-- Rules Text -->
+        <a-text value="Welcome to Conveyor the game, the goal here is simple: some people will come and request objects from you. These objects each have unique attributes (like colors, shapes, etc.). You will need to deposit the requested objects in a box to earn points. Got it? Then have fun!" align="center" side="double" position="0 4 -2" rotation="20 0 0" color="#FFFFFF" width="3"></a-text>
+
+        <!-- Clickable Plane to Navigate to Game -->
+        <a-plane id="clickable" position="0 1.6 -1" rotation="-30 0 0" width="1.5" height="0.75" color="#4CC3D9">
+            <a-text value="Play" position="0 0 0.1" color="#FFFFFF" align="center"></a-text>
+        </a-plane>
+
+        <!-- Ground Plane -->
+        <a-plane position="0 0 -5" rotation="-90 0 0" width="100" height="100" color="#7BC8A4"></a-plane>
+
+        <!-- Lighting -->
+        <a-light type="ambient" color="#bbb"></a-light>
+        <a-light type="directional" color="#fff" intensity="0.6" position="-1 1 1"></a-light>
+
+        <script>
+            document.querySelector('#clickable').addEventListener('click', () => {
+                window.location.href = './game/index.html';
+            });
+        </script>
+    </a-scene>
+</body>
+</html>
