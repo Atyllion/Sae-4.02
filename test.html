@@ -7,17 +7,12 @@
     <!-- Charger A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
-    <!-- Charger Ammo.js -->
-    <script src="https://cdn.jsdelivr.net/gh/kripken/ammo.js@master/builds/ammo.wasm.js"></script>
-
     <!-- Charger la version corrigée de aframe-physics-system -->
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
 
-    <style>
-      .interactive {
-        cursor: grab;
-      }
-    </style>
+    <!-- Charger les composants de contrôleur VR -->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v6.1.0/dist/aframe-extras.loaders.min.js"></script>
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v6.1.0/dist/aframe-extras.controls.min.js"></script>
   </head>
 
   <body>
@@ -32,114 +27,152 @@
       <a-box
         id="ground"
         position="0 -0.75 0"
-        width="10"
+        width="50"
         height="1.5"
-        depth="10"
+        depth="50"
         color="green"
         static-body="shape: box;">
       </a-box>
 
       <!-- Cube soumis à la gravité -->
       <a-box
-        id="fallingCube"
-        class="interactive"
+        id="fallingCube1"
+        class="collidable"
         position="0 5 -2"
         width="1"
         height="1"
         depth="1"
         color="red"
+        dynamic-body="shape: box; mass: 1;"
+        click-grab>
+      </a-box>
+      <!-- Cube soumis à la gravité -->
+      <a-box
+        id="fallingCube2"
+        class="collidable"
+        position="0 6 -2"
+        width="0.7"
+        height="0.7"
+        depth="0.7"
+        color="green"
         dynamic-body="shape: box; mass: 1;">
+      </a-box>
+      <!-- Cube soumis à la gravité -->
+      <a-box
+        id="fallingCube3"
+        class="collidable"
+        position="2 5 -2"
+        width="0.5"
+        height="0.5"
+        depth="0.5"
+        color="blue"
+        dynamic-body="shape: box; mass: 1;"
+        click-grab>
       </a-box>
 
       <!-- Book.glb soumis à la gravité -->
       <a-entity
         id="bookModel"
-        class="interactive"
+        class="collidable"
         gltf-model="assets/Book.glb"
         position="0 4 -2"
         width="1"
         height="1"
         depth="1"
-        color="red"
-        dynamic-body="shape: box; mass: 1;">
+        dynamic-body="shape: box; mass: 1;"
+        click-grab>
       </a-entity>
 
       <!-- Caméra -->
-      <a-entity position="0 0 5">
-        <a-camera></a-camera>
+      <a-entity position="0 1.6 0">
+        <a-camera look-controls="pointerLockEnabled: true">
+          <a-cursor></a-cursor>
+        </a-camera>
       </a-entity>
 
+      <!-- Cursor pour détecter les objets cliquables -->
+      <a-entity cursor="rayOrigin: mouse" raycaster="objects: .collidable"></a-entity>
+
+      <!-- Controllers liés à la caméra -->
+      <a-entity id="cameraRig" position="0 1.6 0">
+        <a-entity camera look-controls wasd-controls>
+          <a-entity id="leftController" oculus-touch-controls="hand: left"></a-entity>
+          <a-entity id="rightController" oculus-touch-controls="hand: right">
+            <a-entity raycaster="showLine:true; objects: .collidable" cursor></a-entity>
+          </a-entity>
+        </a-entity>
+      </a-entity>
     </a-scene>
 
     <script>
-      let isGrabbed = false;
-      let grabbedElement = null;
+      AFRAME.registerComponent("click-grab", {
+        init: function () {
+          let el = this.el;
+          let scene = el.sceneEl;
+          let camera = document.querySelector("a-camera");
+          let isGrabbed = false;
+          let controller;
 
-      function grabElement(event) {
-        const mouse = new THREE.Vector2();
-        const raycaster = new THREE.Raycaster();
-        const camera = document.querySelector('[camera]').object3D;
+          function updatePosition(event) {
+            if (isGrabbed) {
+              let cameraPos = new THREE.Vector3();
+              let cameraQuat = new THREE.Quaternion();
 
-        // Convert mouse position to normalized device coordinates
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+              if (controller) {
+                controller.object3D.getWorldPosition(cameraPos);
+                controller.object3D.getWorldQuaternion(cameraQuat);
+              } else {
+                camera.object3D.getWorldPosition(cameraPos);
+                camera.object3D.getWorldQuaternion(cameraQuat);
+              }
 
-        // Update the raycaster with the camera and mouse positions
-        raycaster.setFromCamera(mouse, camera);
+              // Convertit la position de la souris en coordonnées 3D
+              let mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+              let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        // Get the list of objects that intersect with the ray
-        const intersects = raycaster.intersectObjects(document.querySelectorAll('.interactive'), true);
+              let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -3); // Toujours devant
+              offset.applyQuaternion(cameraQuat); // Oriente l'objet devant la caméra
 
-        if (intersects.length > 0) {
-          const element = intersects[0].object.el;
-          isGrabbed = true;
-          grabbedElement = element;
-          element.removeAttribute('dynamic-body');
-          window.addEventListener('mousemove', moveElement);
-          console.log('Element grabbed:', element.id);
-        } else {
-          console.log('No interactive element found at click position.');
-        }
-      }
+              let newPosition = cameraPos.clone().add(offset);
+              el.object3D.position.copy(newPosition);
+            }
+          }
 
-      function dropElement() {
-        if (isGrabbed && grabbedElement) {
-          isGrabbed = false;
-          grabbedElement.setAttribute('dynamic-body', 'shape: box; mass: 1; restitution: 0.6; friction: 0.5');
-          window.removeEventListener('mousemove', moveElement);
-          grabbedElement = null;
-          console.log('Element dropped');
-        }
-      }
+          el.addEventListener("mousedown", function () {
+            isGrabbed = true;
+            el.setAttribute("dynamic-body", "mass: 0"); // Désactive la gravité
+            window.addEventListener("mousemove", updatePosition);
+          });
 
-      function moveElement(event) {
-        if (isGrabbed && grabbedElement) {
-          const cameraEl = document.querySelector('[camera]').object3D;
-          const cameraPos = new THREE.Vector3();
-          const cameraQuat = new THREE.Quaternion();
+          scene.addEventListener("mouseup", function () {
+            if (isGrabbed) {
+              el.setAttribute("dynamic-body", "mass: 1; restitution: 0.6; friction: 0.5"); // Réactive la gravité
+              isGrabbed = false;
+              window.removeEventListener("mousemove", updatePosition);
+            }
+          });
 
-          cameraEl.getWorldPosition(cameraPos);
-          cameraEl.getWorldQuaternion(cameraQuat);
+          let rightController = document.querySelector('#rightController');
+            if (rightController) {
+            rightController.addEventListener('gripdown', function () {
+              isGrabbed = true;
+              controller = rightController;
+              el.setAttribute("dynamic-body", "mass: 0"); // Désactive la gravité
+              document.querySelector('#ground').setAttribute('color', 'yellow'); // Change la couleur du sol
+            });
 
-          // Convert mouse position to normalized device coordinates
-          let mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-          let mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-
-          let offset = new THREE.Vector3(mouseX * 0.5, mouseY * 0.5, -1); // Always in front
-          offset.applyQuaternion(cameraQuat); // Orient the object in front of the camera
-
-          let newPosition = cameraPos.clone().add(offset);
-          grabbedElement.object3D.position.copy(newPosition);
-
-          // Orient the object to face the camera
-          grabbedElement.object3D.lookAt(cameraPos);
-        }
-      }
-
-      // Add event listeners to the scene for mouse events
-      document.querySelector('a-scene').addEventListener('mousedown', grabElement);
-      document.querySelector('a-scene').addEventListener('mouseup', dropElement);
-
+            rightController.addEventListener('gripup', function () {
+              if (isGrabbed) {
+                el.setAttribute("dynamic-body", "mass: 1; restitution: 0.6; friction: 0.5"); // Réactive la gravité
+                isGrabbed = false;
+                controller = null;
+                window.removeEventListener("mousemove", updatePosition);
+                document.querySelector('#ground').setAttribute('color', 'blue'); // Change la couleur du sol
+              }
+            });
+          }
+        },
+      });
     </script>
   </body>
 </html>

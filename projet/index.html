@@ -36,7 +36,8 @@
 
       <!-- Cube soumis à la gravité -->
       <a-box
-        id="fallingCube"
+        id="fallingCube1"
+        class="collidable"
         position="0 5 -2"
         width="1"
         height="1"
@@ -47,7 +48,7 @@
       </a-box>
       <!-- Cube soumis à la gravité -->
       <a-box
-        id="fallingCube"
+        id="fallingCube2"
         position="0 6 -2"
         width="0.7"
         height="0.7"
@@ -57,7 +58,8 @@
       </a-box>
       <!-- Cube soumis à la gravité -->
       <a-box
-        id="fallingCube"
+        id="fallingCube3"
+        class="collidable"
         position="2 5 -2"
         width="0.5"
         height="0.5"
@@ -70,6 +72,7 @@
       <!-- Book.glb soumis à la gravité -->
       <a-entity
         id="bookModel"
+        class="collidable"
         gltf-model="assets/Book.glb"
         position="0 4 -2"
         width="1"
@@ -80,26 +83,34 @@
       </a-entity>
 
       <!-- Caméra -->
-      <a-entity position="0 0 ">
-        <a-camera look-controls="pointerLockEnabled: true">
+      <a-entity position="0 1.6 0">
+        <a-camera look-controls="pointerLockEnabled: true" wasd-controls="enabled: false">
           <a-cursor></a-cursor>
         </a-camera>
       </a-entity>
 
       <!-- Cursor pour détecter les objets cliquables -->
-      <a-entity cursor="rayOrigin: mouse" raycaster="objects: .interactive"></a-entity>
+      <a-entity cursor="rayOrigin: mouse" raycaster="objects: .collidable"></a-entity>
 
       <!-- Controllers liés à la caméra -->
-      <a-entity id="cameraRig" position="0 0 0">
+      <a-entity id="cameraRig" position="0 1.6 0">
         <a-entity camera look-controls wasd-controls>
-          <a-entity id="leftController" oculus-touch-controls="hand: left"></a-entity>
-          <a-entity id="rightController" oculus-touch-controls="hand: right">
-            <a-entity raycaster="showLine:true;objects: .collidable" cursor></a-entity>
-          </a-entity>
+          <a-entity id="rightController"
+          oculus-touch-controls="hand: right"
+          hand-grabber
+          raycaster="showLine:true; objects: .collidable"
+          cursor>
+        </a-entity>
+        
+        <a-entity id="leftController"
+          oculus-touch-controls="hand: left"
+          hand-grabber
+          raycaster="showLine:true; objects: .collidable"
+          cursor>
+        </a-entity>
         </a-entity>
       </a-entity>
     </a-scene>
-
     <script src="script.js"></script>
   </body>
 </html>
