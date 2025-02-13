@@ -14,6 +14,7 @@
         entity.setAttribute('scale', scale);
         entity.setAttribute('dynamic-body', "shape: box; mass: 1;"); // Propriétés physiques
         entity.setAttribute('click-grab', "");
+        entity.setAttribute('oculus-grab', "");
         entity.setAttribute('id', id);
         entity.setAttribute('class', "collidable");
       
@@ -65,6 +66,8 @@
 
   let Destroy = document.getElementById("DestroyItems");
 
+  
+
   // Function to create multiple objects at intervals
   function MultipleObject() {
     // Set an interval to call the RandomObject function every 2 seconds
@@ -73,6 +76,4 @@
   }
 
   // Décommenter cette fonction pour générer des objets aléatoires toutes les 2 secondes
-  MultipleObject();
-
-
+  // MultipleObject();
