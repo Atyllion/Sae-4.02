@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+.section {
+    position: relative;
+    width: 100vw;
+    background-image: url('../assets/element/background.webp');
+}
+
+.section::after {
+    content: "";
+    background-image: url('../assets/element/conveyor.svg');
+    background-size: 100% 100%; /* Assure que l'image couvre toute la largeur et la hauteur */
+    background-repeat: no-repeat; /* Empêche la répétition de l'image */
+    position: absolute;
+    bottom: 0; /* Place l'image tout en bas de la section */
+    left: 0; /* Assure qu'elle commence à gauche */
+    width: 100%; /* Largeur de 100% de la section */
+    height: auto; /* Hauteur automatique pour conserver le ratio */
+    aspect-ratio: 1 / 1; /* Ajuste le ratio pour éviter une trop grande hauteur */
+    transform: translateY(50%); /* Assure qu'il n'y a pas de décalage */
+}
+
+/* Initial styles */
+.find-text, .magnifying-glass, .grab-text, .grab-icon, .character, .give-text {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+.apple, .grab-icon {
+    transition: transform 0.5s ease-out;
+}
+
+/* Animation classes */
+.fade-in {
+    opacity: 1;
+}
+
+.move-up {
+    transform: translateY(-100px);
+}
+
+
+
+  /*                 <img class=" absolute scale-50 apple" src="./assets/element/apple.png" alt="example of object"> <!-- .apple -->
+                <img class=" absolute scale-50 magnifying-glass" src="./assets/icon/magnifying.svg" alt="magnifying glass"> <!-- .magnifying-glass -->
+                <p class=" absolute text-white text-2xl font-lexend find-text">Find the object</p> <!-- .find-text -->
+                <img class=" absolute scale-50 grab-icon" src="./assets/icon/grab.svg" alt="grab"> <!-- .grab-icon -->
+                <p class=" absolute text-white text-2xl font-lexend grab-text">Grab it</p> <!-- .grab-text -->
+                <img class=" absolute scale-50 character" src="./assets/element/capMan.png" alt="Character"> <!-- .character -->
+                <p class=" absolute text-white text-2xl font-lexend give-text">Give it</p> <!-- .give-text --> */
